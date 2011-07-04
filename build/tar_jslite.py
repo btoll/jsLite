@@ -42,8 +42,8 @@ def main(argv):
 	#define some constants
 	TARBALL = "JSLITE_" + VERSION + ".tgz"
 	TMP_DIR = "jslite/"
-	PORT = "420"
-	DEST_REMOTE = "~/public_html/jslite/download/"
+	PORT = "22"
+	DEST_REMOTE = "/path/to/destination/"
 	USERNAME = getuser()
 
 	try:
@@ -71,7 +71,7 @@ def main(argv):
 			if resp != "":
 				DEST_REMOTE = resp
 
-			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + TARBALL, USERNAME + "@benjamintoll.com:" + DEST_REMOTE])
+			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + TARBALL, USERNAME + "@example.com:" + DEST_REMOTE])
 			sts = waitpid(p.pid, 0)
 			print("tarball " + TARBALL + " pushed to " + DEST_REMOTE + " on remote server")
 		else:
