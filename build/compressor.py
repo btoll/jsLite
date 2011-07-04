@@ -26,8 +26,8 @@ Try `python3 compressed.py --help' for more information.''')
   --dest_dir		the location where the minified file will be moved, defaults to 'yuicompressed/\'''')
 
 def main(argv):
-	JAR_FILE = "/usr/local/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar"
-	SRC_DIR = "/usr/local/www/public/dev/jslite/lib/js/"
+	JAR_FILE = "/path/to/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar"
+	SRC_DIR = "/path/to/src/js/"
 	DEST_DIR = "yuicompressed"
 
 	try:   
@@ -60,8 +60,8 @@ def main(argv):
  	*
  	*/
 	'''
-	PORT = "420"
-	DEST_REMOTE = "~/public_html/jslite/download/"
+	PORT = "22"
+	DEST_REMOTE = "/path/to/dir"
 	USERNAME = getuser()
 
 	try:
@@ -96,7 +96,7 @@ def main(argv):
 			if resp != "":
 				DEST_REMOTE = resp
 
-			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + MINIFIED_SCRIPT, USERNAME + "@benjamintoll.com:" + DEST_REMOTE])
+			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + MINIFIED_SCRIPT, USERNAME + "@example.com:" + DEST_REMOTE])
 			sts = waitpid(p.pid, 0)
 			print("minified script " + MINIFIED_SCRIPT + " pushed to " + DEST_REMOTE + " on remote server")
 		else:
