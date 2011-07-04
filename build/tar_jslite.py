@@ -18,7 +18,7 @@ Try `python3 tar_jslite.py --help' for more information.''')
   --dest_dir		the location where the minified file will be moved, defaults to 'tarballs/\'''')
 
 def main(argv):
-	SRC_DIR = "/usr/local/www/public/dev/jslite/lib/js/"
+	SRC_DIR = "/path/to/src/"
 	DEST_DIR = "tarballs"
 
 	try:   
