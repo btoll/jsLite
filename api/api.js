@@ -140,9 +140,9 @@ JSLITE.ready(function () {
         i,
         s,
         fnExpander = function () { //links in the menubar and links in the search list have different target objects;
-          var oList = JSLITE.dom.get(oUL), oHref = JSLITE.dom.get(oLink);
-          JSLITE.dom.gets("#tree > li > a + ul[id!=" + oUL.id + "]").replaceClass("hide", "show"); //close every list except for the one that was clicked on;
-          JSLITE.dom.gets("#tree > li > a").replaceClass("expand", "contract");
+          var oList = JSLITE.Element.get(oUL), oHref = JSLITE.Element.get(oLink);
+          JSLITE.Element.gets("#tree > li > a + ul[id!=" + oUL.id + "]").replaceClass("hide", "show"); //close every list except for the one that was clicked on;
+          JSLITE.Element.gets("#tree > li > a").replaceClass("expand", "contract");
           if (oList.hasClass("hide")) {
             oList.replaceClass("show", "hide");
             oHref.replaceClass("contract", "expand");
@@ -175,7 +175,7 @@ JSLITE.ready(function () {
   
       if (oTarget.nodeName.toLocaleLowerCase() === "a" && oTarget.className.indexOf("expand") === -1 && oTarget.className.indexOf("contract") === -1) { //only target the links within each "header";
         /*remove the "selected" classname from $("tree") and then add it to the current <a>*/
-        JSLITE.dom.gets("#tree a").removeClass("selected"); //remove the selected class from any element that may have it;
+        JSLITE.Element.gets("#tree a").removeClass("selected"); //remove the selected class from any element that may have it;
         if (oTarget.href.indexOf("#jsdoc") === -1) {
           oTarget.className = "selected"; //only give the target the selected class if it's not a #jsdoc link;
         }
@@ -196,7 +196,7 @@ JSLITE.ready(function () {
           $("description").innerHTML = arr.join("");
           $("source").innerHTML = "<div><pre><code>" + jsdoc.source + "</code></pre></div>";
           $("methodSignature").innerHTML = aSignature.join("");
-          JSLITE.dom.fly("response").replaceClass("show", "hide");
+          JSLITE.Element.fly("response").replaceClass("show", "hide");
         }
       }
 
@@ -230,7 +230,7 @@ JSLITE.ready(function () {
           break;
       }
 
-      JSLITE.dom.gets("#searchList a").removeClass("selected"); //remove any "selected" classname from the search list;
+      JSLITE.Element.gets("#searchList a").removeClass("selected"); //remove any "selected" classname from the search list;
       if (e.preventDefault) {
         e.preventDefault();
       } else {
@@ -245,9 +245,9 @@ JSLITE.ready(function () {
           oFragment = document.createDocumentFragment(),
           i,
           fnListItem = function (obj, sMethod) {
-            var oLink = JSLITE.dom.create({tag: "li",
+            var oLink = JSLITE.Element.create({tag: "li",
               children: [
-                JSLITE.dom.create({tag: "a",
+                JSLITE.Element.create({tag: "a",
                   attr: {
                     href: "#",
                     innerHTML: sMethod,
@@ -280,10 +280,10 @@ JSLITE.ready(function () {
         if (oFragment.childNodes.length > 0) {
           $("searchList").appendChild(oFragment);
         } else {
-          $("searchList").appendChild(JSLITE.dom.create({tag: "li", attr: {innerHTML: "No items found."}}).dom);
+          $("searchList").appendChild(JSLITE.Element.create({tag: "li", attr: {innerHTML: "No items found."}}).dom);
         }
         JSLITE.dom.blur({tag: "a", parent: "searchList"});
-        JSLITE.dom.fly("searchList").on("click", fnJSDoc); //finally, delegate the listener;
+        JSLITE.Element.fly("searchList").on("click", fnJSDoc); //finally, delegate the listener;
       }
       e.preventDefault();
     },
@@ -296,10 +296,10 @@ JSLITE.ready(function () {
         sAbbreviatedMethod,
         sMethod;
 
-      JSLITE.dom.create({tag: "li",
+      JSLITE.Element.create({tag: "li",
         children: [
           /*create the top-level <a> that will open/close the menu*/
-          JSLITE.dom.create({tag: "a",
+          JSLITE.Element.create({tag: "a",
             attr: {
               href: "#",
               className: "expand",
@@ -307,7 +307,7 @@ JSLITE.ready(function () {
             }
           }),
           /*create the <ul> to which we'll append each <a>method</a>*/
-          JSLITE.dom.create({tag: "ul",
+          JSLITE.Element.create({tag: "ul",
             attr: {
               id: sNamespace,
               className: "hide"
@@ -338,9 +338,9 @@ JSLITE.ready(function () {
         if (sMethod.indexOf(sNamespace) !== -1 && sMethod !== sNamespace) {
           sAbbreviatedMethod = sMethod.substring(sNamespace.length + 1);
         }
-        oNewElem = JSLITE.dom.create({tag: "li",
+        oNewElem = JSLITE.Element.create({tag: "li",
           children: [
-            JSLITE.dom.create({tag: "a",
+            JSLITE.Element.create({tag: "a",
               attr: {
                 href: obj.url,
                 id: sMethod,
@@ -412,7 +412,7 @@ JSLITE.ready(function () {
       JSLITE.ux.Tabs();
       JSLITE.dom.targetBlank();
       JSLITE.dom.blur({tag: "a", parent: "tree"});
-      JSLITE.dom.fly("searchForm").on("submit", fnSearch);
+      JSLITE.Element.fly("searchForm").on("submit", fnSearch);
       if (location.hash) {
         var e = {
           target: {
@@ -427,13 +427,13 @@ JSLITE.ready(function () {
       if (JSLITE.isIE) {
         document.execCommand("BackgroundImageCache", false, true); //kills the nasty background image flicker bug in ie6;
       }
-      //JSLITE.dom.fly(JSLITE.globalSymbol + "_Overlay").remove();
+      //JSLITE.Element.fly(JSLITE.globalSymbol + "_Overlay").remove();
       //oOverlay.hide();
     }, 1000);
 
     /*event delegation*/
-    JSLITE.dom.fly("tree").on("click", fnJSDoc);
-    JSLITE.dom.fly("response").on("click", fnJSDoc);
+    JSLITE.Element.fly("tree").on("click", fnJSDoc);
+    JSLITE.Element.fly("response").on("click", fnJSDoc);
 
   }());
 

@@ -29,7 +29,7 @@ Try `python3 compressed.py --help' for more information.''')
 def main(argv):
 	JAR_FILE = "/path/to/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar"
 	SRC_DIR = "/path/to/src/js/"
-	DEST_DIR = "yuicompressed"
+	DEST_DIR = "."
 
 	try:
 		opts, args = getopt.getopt(argv, "hv:", ["help", "version=", "jar=", "src_dir=", "dest_dir="])
@@ -55,7 +55,7 @@ def main(argv):
 	COPYRIGHT = '''/*
  	* jsLite
  	*
- 	* Copyright (c) 2009 - 2011 Benjamin Toll (benjamintoll.com)
+ 	* Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
  	* Dual licensed under the MIT (MIT-LICENSE.txt)
  	* and GPL (GPL-LICENSE.txt) licenses.
  	*
