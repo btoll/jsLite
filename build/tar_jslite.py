@@ -1,9 +1,10 @@
-import tarfile, sys
-from os import listdir, waitpid, path
-from shutil import copytree, rmtree, ignore_patterns
-from getopt import getopt, GetoptError
-from subprocess import Popen
-from getpass import getuser
+import getopt
+import getpass
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
 
 def usage(level):
 	if level == 0:
@@ -15,15 +16,16 @@ Try `python3 tar_jslite.py --help' for more information.''')
   -h, --help		help
   -v, --version		the version of the minified script, must be specified
   --src_dir		the location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'
-  --dest_dir		the location where the minified file will be moved, defaults to 'tarballs/\'''')
+  --dest_dir		the location where the minified file will be moved, defaults to 'tarballs/\'
+        ''')
 
 def main(argv):
 	SRC_DIR = "/path/to/src/"
 	DEST_DIR = "tarballs"
 
-	try:   
-		opts, args = getopt(argv, "hv:", ["help", "version=", "src_dir=", "dest_dir="])
-	except GetoptError:
+	try:
+		opts, args = getopt.getopt(argv, "hv:", ["help", "version=", "src_dir=", "dest_dir="])
+	except getopt.GetoptError:
 		usage(0)
 		sys.exit(2)
 	for opt, arg in opts:
@@ -44,20 +46,20 @@ def main(argv):
 	TMP_DIR = "jslite/"
 	PORT = "22"
 	DEST_REMOTE = "/path/to/destination/"
-	USERNAME = getuser()
+	USERNAME = getpass.getuser()
 
 	try:
-		copytree(SRC_DIR, TMP_DIR, ignore=ignore_patterns("a*", "_*"))
+		shutil.copytree(SRC_DIR, TMP_DIR, ignore=shutil.ignore_patterns("a*", "_*"))
 		tar = tarfile.open(DEST_DIR + "/" + TARBALL, "w:gz")
 		print("creating new tarball...")
 
-		for file in listdir(TMP_DIR):
+		for file in os.listdir(TMP_DIR):
 			tar.add(TMP_DIR + file)
 		tar.close()
 
 		print("created new tarball " + TARBALL + " in " + DEST_DIR + "/")
 		print("cleaning up...")
-		rmtree(TMP_DIR)
+		shutil.rmtree(TMP_DIR)
 
 		resp = input("Push to server? [Y|n]:")
 		if resp in ["Y", "y"]:
@@ -71,8 +73,8 @@ def main(argv):
 			if resp != "":
 				DEST_REMOTE = resp
 
-			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + TARBALL, USERNAME + "@example.com:" + DEST_REMOTE])
-			sts = waitpid(p.pid, 0)
+			p = subprocess.Popen(["scp", "-P", PORT, DEST_DIR + "/" + TARBALL, USERNAME + "@example.com:" + DEST_REMOTE])
+			sts = os.waitpid(p.pid, 0)
 			print("tarball " + TARBALL + " pushed to " + DEST_REMOTE + " on remote server")
 		else:
 			print("tarball " + TARBALL + " created in " + DEST_DIR + "/")
@@ -84,9 +86,9 @@ def main(argv):
 		print("\nprocess aborted")
 
 		#if aborted at input() then TMP_DIR would have already been removed so first check for its existence
-		if (path.isdir(TMP_DIR)):
+		if (os.path.isdir(TMP_DIR)):
 			print("cleaning up...")
-			rmtree(TMP_DIR)
+			shutil.rmtree(TMP_DIR)
 			print("done")
 		sys.exit(1)
 
@@ -96,3 +98,4 @@ if __name__ == "__main__":
 		sys.exit(2)
 
 	main(sys.argv[1:])
+

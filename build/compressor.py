@@ -4,13 +4,13 @@ NOTE JSLITE.prototype.js and then JSLITE.js MUST be compiled first!
 - use os.path.basename to only get the filename
 '''
 
+import getopt
+import getpass
+import glob
+import os
+import subprocess
 import sys
-from getopt import getopt, GetoptError
-from os import path, waitpid
-from glob import glob
-from subprocess import getoutput, Popen
-from time import time
-from getpass import getuser
+import time
 
 def usage(level):
 	if level == 0:
@@ -23,16 +23,17 @@ Try `python3 compressed.py --help' for more information.''')
   -v, --version		the version of the minified script, must be specified
   --jar			the location of the jar file, defaults to '/usr/local/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar'
   --src_dir		the location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'
-  --dest_dir		the location where the minified file will be moved, defaults to 'yuicompressed/\'''')
+  --dest_dir		the location where the minified file will be moved, defaults to 'yuicompressed/\'
+        ''')
 
 def main(argv):
 	JAR_FILE = "/path/to/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar"
 	SRC_DIR = "/path/to/src/js/"
 	DEST_DIR = "yuicompressed"
 
-	try:   
-		opts, args = getopt(argv, "hv:", ["help", "version=", "jar=", "src_dir=", "dest_dir="])
-	except GetoptError:
+	try:
+		opts, args = getopt.getopt(argv, "hv:", ["help", "version=", "jar=", "src_dir=", "dest_dir="])
+	except getopt.GetoptError:
 		usage(0)
 		sys.exit(2)
 	for opt, arg in opts:
@@ -62,22 +63,22 @@ def main(argv):
 	'''
 	PORT = "22"
 	DEST_REMOTE = "/path/to/dir"
-	USERNAME = getuser()
+	USERNAME = getpass.getuser()
 
 	try:
 		print("creating minified script...\n")
 		content = [COPYRIGHT] #write to a buffer
 
-		genny = (FIRST_IN_FILES + [path.basename(filepath) for filepath in glob(SRC_DIR + "JSLITE*.js") if path.basename(filepath) not in FIRST_IN_FILES])
+		genny = (FIRST_IN_FILES + [os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + "JSLITE*.js") if os.path.basename(filepath) not in FIRST_IN_FILES])
 
 		if len(genny) == 2:
 			print("OPERATION ABORTED: No JSLITE source files were found in the specified source directory. Check your path?")
 			sys.exit(1)
 
 		for script in genny:
-			begin = int(time())
-			content.append(getoutput("java -jar " + JAR_FILE + " " + SRC_DIR + script))
-			end = int(time())
+			begin = int(time.time())
+			content.append(subprocess.getoutput("java -jar " + JAR_FILE + " " + SRC_DIR + script))
+			end = int(time.time())
 			print("script " + script + " minified in " + str(end - begin) + "s")
 
 		#this will overwrite pre-existing
@@ -96,8 +97,8 @@ def main(argv):
 			if resp != "":
 				DEST_REMOTE = resp
 
-			p = Popen(["scp", "-P", PORT, DEST_DIR + "/" + MINIFIED_SCRIPT, USERNAME + "@example.com:" + DEST_REMOTE])
-			sts = waitpid(p.pid, 0)
+			p = subprocess.Popen(["scp", "-P", PORT, DEST_DIR + "/" + MINIFIED_SCRIPT, USERNAME + "@example.com:" + DEST_REMOTE])
+			sts = os.waitpid(p.pid, 0)
 			print("minified script " + MINIFIED_SCRIPT + " pushed to " + DEST_REMOTE + " on remote server")
 		else:
 			print("minified script " + MINIFIED_SCRIPT + " created in " + DEST_DIR + "/")
@@ -115,3 +116,4 @@ if __name__ == "__main__":
 		sys.exit(2)
 
 	main(sys.argv[1:])
+
