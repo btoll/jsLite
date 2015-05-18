@@ -10,17 +10,16 @@ import time
 def usage(level):
     if level == 0:
         str = '''
-            Usage: python3 compressed.py [-hv | --help [--version --jar --src_dir --dest_dir]] [VERSION | JAR_FILE | SOURCE_DIRECTORY | DESTINATION_DIRECTORY]
-            Try `python3 compressed.py --help' for more information.
+            Usage: python3 build.py [-hv | --help [--version --jar --src_dir --dest_dir]] [VERSION | JAR_FILE | SOURCE_DIRECTORY | DESTINATION_DIRECTORY]
+            Try `python3 build.py --help' for more information.
         '''
     elif level == 1:
         str = '''
             Usage:
-            -h, --help      help
-            -v, --version   The version of the minified script, must be specified
-            --jar			The location of the jar file, defaults to '/usr/local/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar'
-            --src_dir       The location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'
-            --dest_dir      The location where the minified file will be moved, defaults to cwd
+            --dest_dir      The location where the minified file will be moved, defaults to cwd.
+            --jar           The location of the jar file, defaults to '/usr/local/src/yuicompressor-2.4.8.jar'.
+            --src_dir       The location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'.
+            -v, --version   The version of the minified script, must be specified.
         '''
     print(textwrap.dedent(str))
 
