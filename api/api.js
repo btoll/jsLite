@@ -296,6 +296,20 @@ JSLITE.ready(function () {
         sAbbreviatedMethod,
         sMethod;
 
+        // Let's sort since the methods can be defined in the source in any order.
+        arr.sort(function (a, b) {
+            var s1 = a.chunk.function && a.chunk.function[0].name,
+                s2 = b.chunk.function && b.chunk.function[0].name;
+
+            if (s1 < s2) {
+                return -1;
+            } else if (s1 > s2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
       JSLITE.Element.create({tag: "li",
         children: [
           /*create the top-level <a> that will open/close the menu*/
@@ -316,8 +330,10 @@ JSLITE.ready(function () {
         ],
         parent: "tree"
       });
+
       for (i = 0, len = arr.length; i < len; i++) {
         //sMethod = arr[i].chunk['function'][0].name;
+        sAbbreviatedMethod = '';
         if (arr[i].chunk["function"]) {
           sMethod = arr[i].chunk["function"][0].name;
           oSource[arr[i].chunk["function"][0].name] = {source: arr[i].source, jsdoc: arr[i], namespace: sNamespace}; //capture all functions and properties and their source (for searches);
