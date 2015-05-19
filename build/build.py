@@ -11,20 +11,20 @@ def usage():
     str = '''
         Usage:
         --dest_dir      The location where the minified file will be moved, defaults to cwd.
-        --jar           The location of the jar file, defaults to '/usr/local/src/yuicompressor-2.4.8.jar'.
         --src_dir       The location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'.
+        --jar, -j       The location of the jar file, defaults to '/usr/local/src/yuicompressor-2.4.8.jar'.
         --version, -v   The version of the minified script, must be specified.
     '''
     print(textwrap.dedent(str))
 
 def main(argv):
-    JAR_FILE = '/path/to/yuicompressor-2.4.8.jar'
+    JAR = ''
     DEST_DIR = '.'
     SRC_DIR = ''
     VERSION = ''
 
     try:
-        opts, args = getopt.getopt(argv, 'hv:', ['help', 'version=', 'jar=', 'src_dir=', 'dest_dir='])
+        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'jar=', 'src_dir=', 'dest_dir='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -34,20 +34,29 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt in ('-v', '--version'):
-            VERSION = arg
-        elif opt == '--jar':
-            JAR_FILE = arg
-        elif opt == '--src_dir':
-            SRC_DIR = arg
         elif opt == '--dest_dir':
             DEST_DIR = arg
+        elif opt == '--src_dir':
+            SRC_DIR = arg
+        elif opt in ('-v', '--version'):
+            VERSION = arg
+        elif opt in ('-j', '--jar'):
+            JAR = arg
 
-    if not (SRC_DIR):
+    if not JAR:
+        # Provide an alternate location to the jar to override the environment variable (if set).
+        JAR = os.getenv('YUICOMPRESSOR')
+        if not JAR:
+            JAR = input('Location of YUI Compressor jar (set a YUICOMPRESSOR environment variable to skip this step): ')
+            if not JAR:
+                print('Error: You must provide the location of YUI Compressor jar.')
+                sys.exit(2)
+
+    if not SRC_DIR:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
 
-    if not (VERSION):
+    if not VERSION:
         print('Error: You must provide a version.')
         sys.exit(2)
 
@@ -90,7 +99,7 @@ def main(argv):
 
         for script in genny:
             begin = int(time.time())
-            content.append(subprocess.getoutput('java -jar ' + JAR_FILE + ' ' + SRC_DIR + script))
+            content.append(subprocess.getoutput('java -jar ' + JAR + ' ' + SRC_DIR + script))
             end = int(time.time())
             print('Script ' + script + ' minified in ' + str(end - begin) + 's')
 

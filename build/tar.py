@@ -39,11 +39,11 @@ def main(argv):
         elif opt == '--dest_dir':
             DEST_DIR = arg
 
-    if not (SRC_DIR):
+    if not SRC_DIR:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
 
-    if not (VERSION):
+    if not VERSION:
         print('Error: You must provide a version.')
         sys.exit(2)
 
