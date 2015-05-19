@@ -93,7 +93,7 @@ def main(argv):
 
         genny = (FIRST_IN_FILES + [os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + 'JSLITE*.js') if os.path.basename(filepath) not in FIRST_IN_FILES])
 
-        if len(genny) == 2:
+        if (len(genny) - len(FIRST_IN_FILES) <= 0):
             print('OPERATION ABORTED: No JSLITE source files were found in the specified source directory. Check your path?')
             sys.exit(1)
 
