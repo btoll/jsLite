@@ -79,7 +79,7 @@
   padding: 10px;
 }
 .JSLITE_TooltipClose {
-  background: url(http://localhost/dev/jslite/images/close.gif) 0 50% no-repeat;
+  background: url(../images/close.gif) 0 50% no-repeat;
   position: absolute;
   top: 2px;
   right: 3px;
@@ -91,7 +91,7 @@
 ** Tab rules **
 **************/
 .JSLITE_Tabs ol {
-  background: #F4F4F4 url(../../images/tab_background.jpg) repeat-x bottom;
+  background: #F4F4F4 url(../images/tab_background.jpg) repeat-x bottom;
   float: left;
   list-style: none;
   margin: 0;
@@ -99,7 +99,7 @@
   width: 100%;
 }
 .JSLITE_Tabs ol li {
-  background: url(../../images/tab_right.jpg) no-repeat right top;
+  background: url(../images/tab_right.jpg) no-repeat right top;
   float: left;
   margin: 0 2px;
   padding: 0;
@@ -108,7 +108,7 @@
   margin-left: 8px;
 }
 .JSLITE_Tabs ol li a {
-  background: url(../../images/tab_left.jpg) no-repeat left top;
+  background: url(../images/tab_left.jpg) no-repeat left top;
   color: #DC6C5C;
   display: block; /*We set the anchors to block-level elements so we can control all aspects without worrying about the inline box*/
   font-size: .9em;
@@ -116,10 +116,10 @@
   text-decoration: none;
 }
 .JSLITE_Tabs #selected {
-  background-image: url(../../images/tab_right_selected.jpg);
+  background-image: url(../images/tab_right_selected.jpg);
 }
 .JSLITE_Tabs #selected a {
-  background-image: url(../../images/tab_left_selected.jpg);
+  background-image: url(../images/tab_left_selected.jpg);
   padding-bottom: 5px;
 }
 .JSLITE_Tab {

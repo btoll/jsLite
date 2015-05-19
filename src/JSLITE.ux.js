@@ -432,10 +432,9 @@ JSLITE.ux.Tooltip = (function () {
   return {
 
     init: function (vElems, bAnimate) {
-
       var oTemp,
         vElems,
-        re = /JSLITE_Tooltip_([a-z]+)\[([a-z0-9]+)\]/i;
+        re = /JSLITE_Tooltip_([a-z]+)\[([-_a-z0-9]+)\]/i;
 
       if (this.dom) {
         oTemp = JSLITE.Element.create({tag: "div",
@@ -451,17 +450,21 @@ JSLITE.ux.Tooltip = (function () {
         fnBindHandler(this.dom, bAnimate);
 
       } else {
-        vElems = vElems || document.getElementsByTagName("a"); //if passed w/o any arguments search every link by it's class name;
+        // If passed w/o any arguments search every link by its class name.
+        vElems = vElems || document.getElementsByTagName("a");
+        // Check if it's an instance of Array or a DOM collection.
         arr = typeof vElems === "string" ? [JSLITE.Element.get(vElems, true)] :
-          !JSLITE.isArray(vElems) ? JSLITE.makeArray(vElems) : vElems; //check if it's an instance of Array or a DOM collection;
+          !JSLITE.isArray(vElems) ? JSLITE.makeArray(vElems) : vElems;
 
         arr.forEach(function (elem) {
           elem = JSLITE.Element.get(elem, true);
           if (elem.className) {
             elem.className.replace(re, function (a, $1, $2) {
               elem.tooltip = {
-                type: $1, //html or script;
-                identifier: $2 //the div or the js variable where the data is;
+                // html or script
+                type: $1,
+                // The div or the js variable where the data is.
+                identifier: $2
               };
             });
           }
@@ -471,11 +474,8 @@ JSLITE.ux.Tooltip = (function () {
           }
           fnBuildTooltip(elem.tooltip);
 
-          /*
-           * NOTE
-           * remember to dereference dom elements b/c of ie's COM reference counting;
-           */
-           fnBindHandler(elem, bAnimate);
+          // NOTE: Remember to dereference dom elements b/c of ie's COM reference counting.
+          fnBindHandler(elem, bAnimate);
         });
       }
     }

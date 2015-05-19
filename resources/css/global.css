@@ -157,11 +157,11 @@ div#source {
 /*********************classes and misc*********************/
 .deprecated { color: red !important; }
 .expand {
-  background: url(../../images/plus.gif) 0 50% no-repeat;
+  background: url(../images/plus.gif) 0 50% no-repeat;
   padding: 0 0 0 20px;
 }
 .contract {
-  background: url(../../images/minus.gif) 0 50% no-repeat;
+  background: url(../images/minus.gif) 0 50% no-repeat;
   padding: 0 0 0 20px;
 }
 .selected {

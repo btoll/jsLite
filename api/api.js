@@ -14,7 +14,6 @@ JSLITE.ready(function () {
   //oOverlay.show();
 
   (function () {
-  
     /*first declare all vars and functions*/
     /*save this regex just in case*/
     ///((?:[a-zA-z_\-]*\.)*[a-zA-z_\-]*)\s*[:=]\s*\(?function\s*\([a-zA-Z,\s]*\)/; //matches "Array.prototype.forEach = function (callback, oOptional)";
