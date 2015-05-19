@@ -73,17 +73,22 @@ def main(argv):
         # Write to a buffer.
         content = [textwrap.dedent(COPYRIGHT)]
 
-        #genny = (FIRST_IN_FILES + [os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + 'JSLITE*.js') if os.path.basename(filepath) not in FIRST_IN_FILES])
         genny = ([os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + '*.css') if os.path.basename(filepath)])
 
         if not len(genny):
             print('OPERATION ABORTED: No CSS files were found in the specified source directory. Check your path?')
             sys.exit(1)
 
+        def replace_match(match_obj):
+            if not match_obj.group(1) == '':
+                return match_obj.group(1)
+            else:
+                return ''
+
         # Strip out any comments of the "/* ... */" type (non-greedy). The subexpression matches all chars AND whitespace.
         reStripComments = re.compile(r'/\*(?:.|\s)*?\*/')
         # Remove all whitespace before and after the following chars: { } : ; = , < >
-        reRemoveWhitespace = re.compile(r'\s*(?:|:|{|}|;|=|,|<|>)\s*')
+        reRemoveWhitespace = re.compile(r'\s*({|}|:|;|=|,|<|>)\s*')
         # Lastly, replace all double spaces with a single space.
         reReplaceDoubleSpaces = re.compile(r'^\s+|\s+$')
 
@@ -92,7 +97,7 @@ def main(argv):
                 file_contents = f.read()
 
             file_contents = reStripComments.sub('', file_contents)
-            file_contents = reRemoveWhitespace.sub('', file_contents)
+            file_contents = reRemoveWhitespace.sub(replace_match, file_contents)
             file_contents = reReplaceDoubleSpaces.sub('', file_contents)
 
             content.append(file_contents)
