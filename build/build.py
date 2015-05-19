@@ -5,7 +5,6 @@ import os
 import subprocess
 import sys
 import textwrap
-import time
 
 def usage():
     str = '''
@@ -98,10 +97,8 @@ def main(argv):
             sys.exit(1)
 
         for script in genny:
-            begin = int(time.time())
             content.append(subprocess.getoutput('java -jar ' + JAR + ' ' + SRC_DIR + script))
-            end = int(time.time())
-            print('Script ' + script + ' minified in ' + str(end - begin) + 's')
+            print('Script ' + script + ' minified.')
 
         # This will overwrite pre-existing.
         with open(DEST_DIR + '/' + MINIFIED_SCRIPT, mode='w', encoding='utf-8') as fp:
