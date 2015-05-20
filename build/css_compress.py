@@ -18,9 +18,9 @@ def usage():
     print(textwrap.dedent(str))
 
 def main(argv):
-    DEST_DIR = '.'
-    SRC_DIR = ''
-    VERSION = ''
+    dest_dir = '.'
+    src_dir = ''
+    version = ''
 
     try:
         opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'src_dir=', 'dest_dir='])
@@ -34,27 +34,30 @@ def main(argv):
             usage()
             sys.exit(0)
         elif opt == '--dest_dir':
-            DEST_DIR = arg
+            dest_dir = arg
         elif opt == '--src_dir':
-            SRC_DIR = arg
+            src_dir = arg
         elif opt in ('-v', '--version'):
-            VERSION = arg
+            version = arg
 
-    if not SRC_DIR:
+    if not src_dir:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
 
-    if not VERSION:
+    if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
+    compress(version, src_dir, dest_dir)
+
+def compress(version, src_dir, dest_dir='.'):
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
     #FIRST_IN_FILES = []
 
-    MINIFIED_SCRIPT = 'JSLITE_CSS_' + VERSION + '.min.js'
-    COPYRIGHT = '''\
+    minified_script = 'JSLITE_CSS_' + version + '.min.js'
+    copyright = '''\
         /*
-         * jsLite {VERSION!s}
+         * jsLite {version!s}
          *
          * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
          * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -63,17 +66,17 @@ def main(argv):
          */
     '''.format(**locals())
 
-    PORT = '22'
-    DEST_REMOTE = '~'
-    USERNAME = getpass.getuser()
+    port = '22'
+    dest_remote = '~'
+    username = getpass.getuser()
 
     try:
         print('Creating minified script...\n')
 
         # Write to a buffer.
-        content = [textwrap.dedent(COPYRIGHT)]
+        content = [textwrap.dedent(copyright)]
 
-        genny = ([os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + '*.css') if os.path.basename(filepath)])
+        genny = ([os.path.basename(filepath) for filepath in glob.glob(src_dir + '*.css') if os.path.basename(filepath)])
 
         if not len(genny):
             print('OPERATION ABORTED: No CSS files were found in the specified source directory. Check your path?')
@@ -93,7 +96,7 @@ def main(argv):
         reReplaceDoubleSpaces = re.compile(r'^\s+|\s+$')
 
         for script in genny:
-            with open(SRC_DIR + script) as f:
+            with open(src_dir + script) as f:
                 file_contents = f.read()
 
             file_contents = reStripComments.sub('', file_contents)
@@ -104,27 +107,27 @@ def main(argv):
             print('CSS file ' + script + ' minified.')
 
         # This will overwrite pre-existing.
-        with open(DEST_DIR + '/' + MINIFIED_SCRIPT, mode='w', encoding='utf-8') as fp:
+        with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
             fp.write(''.join(content))
 
         resp = input('\nPush to server? [y|N]: ')
         if resp in ['Y', 'y']:
-            resp = input('Username [' + USERNAME + ']:')
+            resp = input('Username [' + username + ']:')
             if resp != '':
-                USERNAME = resp
-            resp = input('Port [' + PORT + ']:')
+                username = resp
+            resp = input('Port [' + port + ']:')
             if resp != '':
-                PORT = resp
-            resp = input('Remote destination [' + DEST_REMOTE + ']:')
+                port = resp
+            resp = input('Remote destination [' + dest_remote + ']:')
             if resp != '':
-                DEST_REMOTE = resp
+                dest_remote = resp
 
-            p = subprocess.Popen(['scp', '-P', PORT, DEST_DIR + '/' + MINIFIED_SCRIPT, USERNAME + '@example.com:' + DEST_REMOTE])
+            p = subprocess.Popen(['scp', '-P', port, dest_dir + '/' + minified_script, username + '@example.com:' + dest_remote])
             sts = os.waitpid(p.pid, 0)
-            print('Minified file ' + MINIFIED_SCRIPT + ' pushed to ' + DEST_REMOTE + ' on remote server.')
+            print('Minified file ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Minified file ' + MINIFIED_SCRIPT + ' created in ' + DEST_DIR + '/')
+            print('Minified file ' + minified_script + ' created in ' + dest_dir + '/')
 
         print('Done!')
 
