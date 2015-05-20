@@ -42,18 +42,25 @@ def main(argv):
         elif opt in ('-j', '--jar'):
             jar = arg
 
-    if not src_dir:
-        print('Error: You must provide the location of the source files.')
-        sys.exit(2)
+    compress(version, src_dir, dest_dir, jar)
 
+def compress(version, src_dir, dest_dir='.', jar=None):
     if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
-    compress(version, src_dir, dest_dir, jar)
+    if not src_dir:
+        print('Error: You must provide the location of the source files.')
+        sys.exit(2)
 
-def compress(version, src_dir, dest_dir='.', jar=None):
-    jar = get_jar(jar)
+    if not jar:
+        # Provide an alternate location to the jar to override the environment variable (if set).
+        jar = os.getenv('YUICOMPRESSOR')
+        if not jar:
+            jar = input('Location of YUI Compressor jar (set a YUICOMPRESSOR environment variable to skip this step): ')
+            if not jar:
+                print('Error: You must provide the location of YUI Compressor jar.')
+                sys.exit(2)
 
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
     first_in_files = [
@@ -125,18 +132,6 @@ def compress(version, src_dir, dest_dir='.', jar=None):
         # Control-c sent a SIGINT to the process, handle it.
         print('\nProcess aborted!')
         sys.exit(1)
-
-def get_jar(jar):
-    if not jar:
-        # Provide an alternate location to the jar to override the environment variable (if set).
-        jar = os.getenv('YUICOMPRESSOR')
-        if not jar:
-            jar = input('Location of YUI Compressor jar (set a YUICOMPRESSOR environment variable to skip this step): ')
-            if not jar:
-                print('Error: You must provide the location of YUI Compressor jar.')
-                sys.exit(2)
-
-    return jar
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

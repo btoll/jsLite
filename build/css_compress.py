@@ -40,17 +40,17 @@ def main(argv):
         elif opt in ('-v', '--version'):
             version = arg
 
-    if not src_dir:
-        print('Error: You must provide the location of the source files.')
-        sys.exit(2)
+    compress(version, src_dir, dest_dir)
 
+def compress(version, src_dir, dest_dir='.'):
     if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
-    compress(version, src_dir, dest_dir)
+    if not src_dir:
+        print('Error: You must provide the location of the source files.')
+        sys.exit(2)
 
-def compress(version, src_dir, dest_dir='.'):
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
     #FIRST_IN_FILES = []
 
