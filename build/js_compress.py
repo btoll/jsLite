@@ -17,10 +17,10 @@ def usage():
     print(textwrap.dedent(str))
 
 def main(argv):
-    JAR = ''
-    DEST_DIR = '.'
-    SRC_DIR = ''
-    VERSION = ''
+    jar = None
+    dest_dir = '.'
+    src_dir = ''
+    version = ''
 
     try:
         opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'jar=', 'src_dir=', 'dest_dir='])
@@ -34,33 +34,29 @@ def main(argv):
             usage()
             sys.exit(0)
         elif opt == '--dest_dir':
-            DEST_DIR = arg
+            dest_dir = arg
         elif opt == '--src_dir':
-            SRC_DIR = arg
+            src_dir = arg
         elif opt in ('-v', '--version'):
-            VERSION = arg
+            version = arg
         elif opt in ('-j', '--jar'):
-            JAR = arg
+            jar = arg
 
-    if not JAR:
-        # Provide an alternate location to the jar to override the environment variable (if set).
-        JAR = os.getenv('YUICOMPRESSOR')
-        if not JAR:
-            JAR = input('Location of YUI Compressor jar (set a YUICOMPRESSOR environment variable to skip this step): ')
-            if not JAR:
-                print('Error: You must provide the location of YUI Compressor jar.')
-                sys.exit(2)
-
-    if not SRC_DIR:
+    if not src_dir:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
 
-    if not VERSION:
+    if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
+    compress(version, src_dir, dest_dir, jar)
+
+def compress(version, src_dir, dest_dir='.', jar=None):
+    jar = get_jar(jar)
+
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
-    FIRST_IN_FILES = [
+    first_in_files = [
         'JSLITE.prototype.js',
         'JSLITE.js',
         'JSLITE.Element.js',
@@ -68,10 +64,10 @@ def main(argv):
         'JSLITE.Observer.js'
     ]
 
-    MINIFIED_SCRIPT = 'JSLITE_' + VERSION + '.min.js'
-    COPYRIGHT = '''\
+    minified_script = 'JSLITE_' + version + '.min.js'
+    copyright = '''\
         /*
-         * jsLite {VERSION!s}
+         * jsLite {version!s}
          *
          * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
          * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -80,48 +76,48 @@ def main(argv):
          */
     '''.format(**locals())
 
-    PORT = '22'
-    DEST_REMOTE = '~'
-    USERNAME = getpass.getuser()
+    port = '22'
+    dest_remote = '~'
+    username = getpass.getuser()
 
     try:
         print('Creating minified script...\n')
 
         # Write to a buffer.
-        content = [textwrap.dedent(COPYRIGHT)]
+        content = [textwrap.dedent(copyright)]
 
-        genny = (FIRST_IN_FILES + [os.path.basename(filepath) for filepath in glob.glob(SRC_DIR + 'JSLITE*.js') if os.path.basename(filepath) not in FIRST_IN_FILES])
+        genny = (first_in_files + [os.path.basename(filepath) for filepath in glob.glob(src_dir + 'JSLITE*.js') if os.path.basename(filepath) not in first_in_files])
 
-        if (len(genny) - len(FIRST_IN_FILES) <= 0):
+        if (len(genny) - len(first_in_files) <= 0):
             print('OPERATION ABORTED: No JSLITE source files were found in the specified source directory. Check your path?')
             sys.exit(1)
 
         for script in genny:
-            content.append(subprocess.getoutput('java -jar ' + JAR + ' ' + SRC_DIR + script))
+            content.append(subprocess.getoutput('java -jar ' + jar + ' ' + src_dir + script))
             print('Script ' + script + ' minified.')
 
         # This will overwrite pre-existing.
-        with open(DEST_DIR + '/' + MINIFIED_SCRIPT, mode='w', encoding='utf-8') as fp:
+        with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
             fp.write(''.join(content))
 
         resp = input('\nPush to server? [y|N]: ')
         if resp in ['Y', 'y']:
-            resp = input('Username [' + USERNAME + ']:')
+            resp = input('Username [' + username + ']:')
             if resp != '':
-                USERNAME = resp
-            resp = input('Port [' + PORT + ']:')
+                username = resp
+            resp = input('Port [' + port + ']:')
             if resp != '':
-                PORT = resp
-            resp = input('Remote destination [' + DEST_REMOTE + ']:')
+                port = resp
+            resp = input('Remote destination [' + dest_remote + ']:')
             if resp != '':
-                DEST_REMOTE = resp
+                dest_remote = resp
 
-            p = subprocess.Popen(['scp', '-P', PORT, DEST_DIR + '/' + MINIFIED_SCRIPT, USERNAME + '@example.com:' + DEST_REMOTE])
+            p = subprocess.Popen(['scp', '-P', port, dest_dir + '/' + minified_script, username + '@example.com:' + dest_remote])
             sts = os.waitpid(p.pid, 0)
-            print('Minified script ' + MINIFIED_SCRIPT + ' pushed to ' + DEST_REMOTE + ' on remote server.')
+            print('Minified script ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Minified script ' + MINIFIED_SCRIPT + ' created in ' + DEST_DIR + '/')
+            print('Minified script ' + minified_script + ' created in ' + dest_dir + '/')
 
         print('Done!')
 
@@ -129,6 +125,18 @@ def main(argv):
         # Control-c sent a SIGINT to the process, handle it.
         print('\nProcess aborted!')
         sys.exit(1)
+
+def get_jar(jar):
+    if not jar:
+        # Provide an alternate location to the jar to override the environment variable (if set).
+        jar = os.getenv('YUICOMPRESSOR')
+        if not jar:
+            jar = input('Location of YUI Compressor jar (set a YUICOMPRESSOR environment variable to skip this step): ')
+            if not jar:
+                print('Error: You must provide the location of YUI Compressor jar.')
+                sys.exit(2)
+
+    return jar
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
