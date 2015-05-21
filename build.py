@@ -6,9 +6,6 @@ import textwrap
 
 def usage():
     str = '''
-
-    build(version, js_src, css_src, build_dir)
-
         USAGE:
 
             CLI:
