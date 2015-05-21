@@ -10,8 +10,8 @@ def usage():
     str = '''
         Usage:
         --dest_dir      The location where the minified file will be moved, defaults to cwd.
-        --src_dir       The location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'.
-        --jar, -j       The location of the jar file, defaults to '/usr/local/src/yuicompressor-2.4.8.jar'.
+        --src_dir       The location of the JSLITE source files, must be specified.
+        --jar, -j       The location of the jar file, defaults to value of YUICOMPRESSOR environment variable.
         --version, -v   The version of the minified script, must be specified.
     '''
     print(textwrap.dedent(str))
@@ -63,7 +63,7 @@ def compress(version, src_dir, dest_dir='.', jar=None):
                 sys.exit(2)
 
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
-    first_in_files = [
+    dependencies = [
         'JSLITE.prototype.js',
         'JSLITE.js',
         'JSLITE.Element.js',
@@ -91,22 +91,23 @@ def compress(version, src_dir, dest_dir='.', jar=None):
         print('Creating minified script...\n')
 
         # Write to a buffer.
-        content = [textwrap.dedent(copyright)]
+        buff = [textwrap.dedent(copyright)]
 
-        genny = (first_in_files + [os.path.basename(filepath) for filepath in glob.glob(src_dir + 'JSLITE*.js') if os.path.basename(filepath) not in first_in_files])
+        genny = (dependencies + [os.path.basename(filepath) for filepath in glob.glob(src_dir + 'JSLITE*.js') if os.path.basename(filepath) not in dependencies])
 
-        if (len(genny) - len(first_in_files) <= 0):
+        if (len(genny) - len(dependencies) <= 0):
             print('OPERATION ABORTED: No JSLITE source files were found in the specified source directory. Check your path?')
             sys.exit(1)
 
         for script in genny:
-            content.append(subprocess.getoutput('java -jar ' + jar + ' ' + src_dir + script))
+            buff.append(subprocess.getoutput('java -jar ' + jar + ' ' + src_dir + script))
             print('Script ' + script + ' minified.')
 
         # This will overwrite pre-existing.
+        os.makedirs(dest_dir, exist_ok=True)
         with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
-            fp.write(''.join(content))
+            fp.write(''.join(buff))
 
         resp = input('\nPush to server? [y|N]: ')
         if resp in ['Y', 'y']:
@@ -124,9 +125,7 @@ def compress(version, src_dir, dest_dir='.', jar=None):
             sts = os.waitpid(p.pid, 0)
             print('Minified script ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Minified script ' + minified_script + ' created in ' + dest_dir + '/')
-
-        print('Done!')
+            print('Created minified script ' + minified_script + ' in ' + dest_dir)
 
     except (KeyboardInterrupt):
         # Control-c sent a SIGINT to the process, handle it.

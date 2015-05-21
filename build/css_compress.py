@@ -12,7 +12,7 @@ def usage():
     str = '''
         Usage:
         --dest_dir      The location where the minified file will be moved, defaults to cwd.
-        --src_dir       The location of the JSLITE source files, defaults to '/usr/local/www/public/dev/jslite/lib/js/'.
+        --src_dir       The location of the JSLITE source files, must be specified.
         --version, -v   The version of the minified script, must be specified.
     '''
     print(textwrap.dedent(str))
@@ -52,7 +52,7 @@ def compress(version, src_dir, dest_dir='.'):
         sys.exit(2)
 
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
-    #FIRST_IN_FILES = []
+    #dependencies = []
 
     minified_script = 'JSLITE_CSS_' + version + '.min.js'
     copyright = '''\
@@ -74,7 +74,7 @@ def compress(version, src_dir, dest_dir='.'):
         print('Creating minified script...\n')
 
         # Write to a buffer.
-        content = [textwrap.dedent(copyright)]
+        buff = [textwrap.dedent(copyright)]
 
         genny = ([os.path.basename(filepath) for filepath in glob.glob(src_dir + '*.css') if os.path.basename(filepath)])
 
@@ -103,13 +103,14 @@ def compress(version, src_dir, dest_dir='.'):
             file_contents = reRemoveWhitespace.sub(replace_match, file_contents)
             file_contents = reReplaceDoubleSpaces.sub('', file_contents)
 
-            content.append(file_contents)
+            buff.append(file_contents)
             print('CSS file ' + script + ' minified.')
 
         # This will overwrite pre-existing.
+        os.makedirs(dest_dir, exist_ok=True)
         with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
-            fp.write(''.join(content))
+            fp.write(''.join(buff))
 
         resp = input('\nPush to server? [y|N]: ')
         if resp in ['Y', 'y']:
@@ -127,9 +128,7 @@ def compress(version, src_dir, dest_dir='.'):
             sts = os.waitpid(p.pid, 0)
             print('Minified file ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Minified file ' + minified_script + ' created in ' + dest_dir + '/')
-
-        print('Done!')
+            print('Created minified file ' + minified_script + ' in ' + dest_dir)
 
     except (KeyboardInterrupt):
         # Control-c sent a SIGINT to the process, handle it.
