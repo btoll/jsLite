@@ -11,19 +11,21 @@ import time
 def usage():
     str = '''
         Usage:
-        --dest_dir      The location where the minified file will be moved, defaults to cwd.
-        --src_dir       The location of the JSLITE source files, must be specified.
-        --version, -v   The version of the minified script, must be specified.
+        --output       The name of the new minimized file, defaults to 'min.css'.
+        --dest         The location where the minified file will be moved, defaults to cwd.
+        --src          The location of the CSS files, must be specified.
+        --version, -v  The version of the minified script, must be specified.
     '''
     print(textwrap.dedent(str))
 
 def main(argv):
-    dest_dir = '.'
-    src_dir = ''
+    dest = '.'
+    src = ''
+    output = 'min.css'
     version = ''
 
     try:
-        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'src_dir=', 'dest_dir='])
+        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'output=', 'src=', 'dest='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -33,50 +35,35 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt == '--dest_dir':
-            dest_dir = arg
-        elif opt == '--src_dir':
-            src_dir = arg
+        elif opt == '--output':
+            output = arg
+        elif opt == '--dest':
+            dest = arg
+        elif opt == '--src':
+            src = arg
         elif opt in ('-v', '--version'):
             version = arg
 
-    compress(version, src_dir, dest_dir)
+    compress(version, src, output, dest)
 
-def compress(version, src_dir, dest_dir='.'):
+def compress(version, src, output='min.css', dest='.'):
     if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
-    if not src_dir:
+    if not src:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
-
-    # The order is very important due to some dependencies between scripts, so specify the dependency order here.
-    #dependencies = []
-
-    minified_script = 'JSLITE_CSS_' + version + '.min.js'
-    copyright = '''\
-        /*
-         * jsLite {version!s}
-         *
-         * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
-         * Dual licensed under the MIT (MIT-LICENSE.txt)
-         * and GPL (GPL-LICENSE.txt) licenses.
-         *
-         */
-    '''.format(**locals())
 
     port = '22'
     dest_remote = '~'
     username = getpass.getuser()
+    buff = []
 
     try:
         print('Creating minified script...\n')
 
-        # Write to a buffer.
-        buff = [textwrap.dedent(copyright)]
-
-        genny = ([os.path.basename(filepath) for filepath in glob.glob(src_dir + '*.css') if os.path.basename(filepath)])
+        genny = ([os.path.basename(filepath) for filepath in glob.glob(src + '*.css') if os.path.basename(filepath)])
 
         if not len(genny):
             print('OPERATION ABORTED: No CSS files were found in the specified source directory. Check your path?')
@@ -96,7 +83,7 @@ def compress(version, src_dir, dest_dir='.'):
         reReplaceDoubleSpaces = re.compile(r'^\s+|\s+$')
 
         for script in genny:
-            with open(src_dir + script) as f:
+            with open(src + script) as f:
                 file_contents = f.read()
 
             file_contents = reStripComments.sub('', file_contents)
@@ -107,8 +94,8 @@ def compress(version, src_dir, dest_dir='.'):
             print('CSS file ' + script + ' minified.')
 
         # This will overwrite pre-existing.
-        os.makedirs(dest_dir, exist_ok=True)
-        with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
+        os.makedirs(dest, exist_ok=True)
+        with open(dest + '/' + output, mode='w', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
             fp.write(''.join(buff))
 
@@ -124,11 +111,11 @@ def compress(version, src_dir, dest_dir='.'):
             if resp != '':
                 dest_remote = resp
 
-            p = subprocess.Popen(['scp', '-P', port, dest_dir + '/' + minified_script, username + '@example.com:' + dest_remote])
+            p = subprocess.Popen(['scp', '-P', port, dest + '/' + output, username + '@example.com:' + dest_remote])
             sts = os.waitpid(p.pid, 0)
-            print('Minified file ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
+            print('Minified file ' + output + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Created minified file ' + minified_script + ' in ' + dest_dir)
+            print('Created minified file ' + output + ' in ' + dest)
 
     except (KeyboardInterrupt):
         # Control-c sent a SIGINT to the process, handle it.

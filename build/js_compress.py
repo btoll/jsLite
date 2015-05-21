@@ -1,3 +1,5 @@
+# TODO: support compressors other than YUI Compressor?
+
 import getopt
 import getpass
 import glob
@@ -9,8 +11,10 @@ import textwrap
 def usage():
     str = '''
         Usage:
-        --dest_dir      The location where the minified file will be moved, defaults to cwd.
-        --src_dir       The location of the JSLITE source files, must be specified.
+        --dependencies  A list of scripts, FIFO when compressed, default to an empty list..
+        --output        The name of the new minimized file, defaults to 'min.js'.
+        --dest          The location where the minified file will be moved, defaults to cwd.
+        --src           The location of the JavaScript source files, must be specified.
         --jar, -j       The location of the jar file, defaults to value of YUICOMPRESSOR environment variable.
         --version, -v   The version of the minified script, must be specified.
     '''
@@ -18,12 +22,14 @@ def usage():
 
 def main(argv):
     jar = None
-    dest_dir = '.'
-    src_dir = ''
+    dest = '.'
+    src = ''
+    output = 'min.js'
     version = ''
+    dependencies = []
 
     try:
-        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'jar=', 'src_dir=', 'dest_dir='])
+        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'output=', 'jar=', 'src=', 'dest='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -33,23 +39,27 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt == '--dest_dir':
-            dest_dir = arg
-        elif opt == '--src_dir':
-            src_dir = arg
+        elif opt == '--dependencies':
+            dependencies = arg
+        elif opt == '--output':
+            output = arg
+        elif opt == '--dest':
+            dest = arg
+        elif opt == '--src':
+            src = arg
         elif opt in ('-v', '--version'):
             version = arg
         elif opt in ('-j', '--jar'):
             jar = arg
 
-    compress(version, src_dir, dest_dir, jar)
+    compress(version, src, output, dest, dependencies, jar)
 
-def compress(version, src_dir, dest_dir='.', jar=None):
+def compress(version, src, output='min.js', dest='.', dependencies=[], jar=None):
     if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
-    if not src_dir:
+    if not src:
         print('Error: You must provide the location of the source files.')
         sys.exit(2)
 
@@ -62,50 +72,28 @@ def compress(version, src_dir, dest_dir='.', jar=None):
                 print('Error: You must provide the location of YUI Compressor jar.')
                 sys.exit(2)
 
-    # The order is very important due to some dependencies between scripts, so specify the dependency order here.
-    dependencies = [
-        'JSLITE.prototype.js',
-        'JSLITE.js',
-        'JSLITE.Element.js',
-        'JSLITE.Composite.js',
-        'JSLITE.Observer.js'
-    ]
-
-    minified_script = 'JSLITE_' + version + '.min.js'
-    copyright = '''\
-        /*
-         * jsLite {version!s}
-         *
-         * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
-         * Dual licensed under the MIT (MIT-LICENSE.txt)
-         * and GPL (GPL-LICENSE.txt) licenses.
-         *
-         */
-    '''.format(**locals())
-
     port = '22'
     dest_remote = '~'
     username = getpass.getuser()
+    buff = []
 
     try:
         print('Creating minified script...\n')
 
-        # Write to a buffer.
-        buff = [textwrap.dedent(copyright)]
-
-        genny = (dependencies + [os.path.basename(filepath) for filepath in glob.glob(src_dir + 'JSLITE*.js') if os.path.basename(filepath) not in dependencies])
+        genny = (dependencies + [os.path.basename(filepath) for filepath in glob.glob(src + '*.js') if os.path.basename(filepath) not in dependencies])
 
         if (len(genny) - len(dependencies) <= 0):
-            print('OPERATION ABORTED: No JSLITE source files were found in the specified source directory. Check your path?')
+            print('OPERATION ABORTED: No JavaScript source files were found in the specified source directory. Check your path?')
             sys.exit(1)
 
         for script in genny:
-            buff.append(subprocess.getoutput('java -jar ' + jar + ' ' + src_dir + script))
+            buff.append(subprocess.getoutput('java -jar ' + jar + ' ' + src + script))
             print('Script ' + script + ' minified.')
 
         # This will overwrite pre-existing.
-        os.makedirs(dest_dir, exist_ok=True)
-        with open(dest_dir + '/' + minified_script, mode='w', encoding='utf-8') as fp:
+        os.makedirs(dest, exist_ok=True)
+        # Let's append in case a build prepending copyright information (or anything, really) before calling here.
+        with open(dest + '/' + output, mode='a', encoding='utf-8') as fp:
             # Flush the buffer (only perform I/O once).
             fp.write(''.join(buff))
 
@@ -121,11 +109,11 @@ def compress(version, src_dir, dest_dir='.', jar=None):
             if resp != '':
                 dest_remote = resp
 
-            p = subprocess.Popen(['scp', '-P', port, dest_dir + '/' + minified_script, username + '@example.com:' + dest_remote])
+            p = subprocess.Popen(['scp', '-P', port, dest + '/' + output, username + '@example.com:' + dest_remote])
             sts = os.waitpid(p.pid, 0)
-            print('Minified script ' + minified_script + ' pushed to ' + dest_remote + ' on remote server.')
+            print('Minified script ' + output + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Created minified script ' + minified_script + ' in ' + dest_dir)
+            print('Created minified script ' + output + ' in ' + dest)
 
     except (KeyboardInterrupt):
         # Control-c sent a SIGINT to the process, handle it.
