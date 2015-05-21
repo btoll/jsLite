@@ -17,9 +17,9 @@ def usage():
     print(textwrap.dedent(str))
 
 def main(argv):
-    DEST_DIR = '.'
-    SRC_DIR = ''
-    VERSION = ''
+    dest_dir = '.'
+    src_dir = ''
+    version = ''
 
     try:
         opts, args = getopt.getopt(argv, 'hv:', ['help', 'version=', 'src_dir=', 'dest_dir='])
@@ -33,69 +33,70 @@ def main(argv):
             usage()
             sys.exit(0)
         elif opt in ('-v', '--version'):
-            VERSION = arg
+            version = arg
         elif opt == '--src_dir':
-            SRC_DIR = arg
+            src_dir = arg
         elif opt == '--dest_dir':
-            DEST_DIR = arg
+            dest_dir = arg
 
-    if not SRC_DIR:
-        print('Error: You must provide the location of the source files.')
-        sys.exit(2)
+    tar(version, src_dir, dest_dir)
 
-    if not VERSION:
+def tar(version, src_dir, dest_dir='.'):
+    if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
+    if not src_dir:
+        print('Error: You must provide the location of the source files.')
+        sys.exit(2)
+
     # Define some constants.
-    TARBALL = 'JSLITE_' + VERSION + '.tgz'
-    TMP_DIR = 'jslite/'
-    PORT = '22'
-    DEST_REMOTE = '~'
-    USERNAME = getpass.getuser()
+    tarball = 'JSLITE_' + version + '.tgz'
+    tmp_dir = 'jslite/'
+    port = '22'
+    dest_remote = '~'
+    username = getpass.getuser()
 
     try:
-        shutil.copytree(SRC_DIR, TMP_DIR, ignore=shutil.ignore_patterns('a*', '_*'))
-        tar = tarfile.open(DEST_DIR + '/' + TARBALL, 'w:gz')
+        shutil.copytree(src_dir, tmp_dir, ignore=shutil.ignore_patterns('a*', '_*'))
+        tar_object = tarfile.open(dest_dir + '/' + tarball, 'w:gz')
         print('Creating new tarball...')
 
-        for file in os.listdir(TMP_DIR):
-            tar.add(TMP_DIR + file)
+        for file in os.listdir(tmp_dir):
+            tar_object.add(tmp_dir + file)
 
-        tar.close()
+        tar_object.close()
 
-        print('Created new tarball ' + TARBALL + ' in ' + DEST_DIR + '/')
+        print('Created new tarball ' + tarball + ' in ' + dest_dir + '/')
         print('Cleaning up...')
-        shutil.rmtree(TMP_DIR)
+        shutil.rmtree(tmp_dir)
 
         resp = input('Push to server? [y|N]:')
         if resp in ['Y', 'y']:
-            resp = input('Username [' + USERNAME + ']:')
+            resp = input('Username [' + username + ']:')
             if resp != '':
-                USERNAME = resp
-            resp = input('Port [' + PORT + ']:')
+                username = resp
+            resp = input('Port [' + port + ']:')
             if resp != '':
-                PORT = resp
-            resp = input('Remote destination [' + DEST_REMOTE + ']:')
+                port = resp
+            resp = input('Remote destination [' + dest_remote + ']:')
             if resp != '':
-                DEST_REMOTE = resp
+                dest_remote = resp
 
-            p = subprocess.Popen(['scp', '-P', PORT, DEST_DIR + '/' + TARBALL, USERNAME + '@example.com:' + DEST_REMOTE])
+            p = subprocess.Popen(['scp', '-P', port, dest_dir + '/' + tarball, username + '@example.com:' + dest_remote])
             sts = os.waitpid(p.pid, 0)
-            print('Tarball ' + TARBALL + ' pushed to ' + DEST_REMOTE + ' on remote server.')
+            print('Tarball ' + tarball + ' pushed to ' + dest_remote + ' on remote server.')
         else:
-            print('Tarball ' + TARBALL + ' created in ' + DEST_DIR + '/')
-
-        print('Done!')
+            print('Created tarball ' + tarball + ' in ' + dest_dir + '/')
 
     except (KeyboardInterrupt):
         # Control-C sent a SIGINT to the process, handle it.
         print('\nProcess aborted!')
 
-        # If aborted at input() then TMP_DIR would have already been removed so first check for its existence.
-        if (os.path.isdir(TMP_DIR)):
+        # If aborted at input() then tmp_dir would have already been removed so first check for its existence.
+        if (os.path.isdir(tmp_dir)):
             print('Cleaning up...')
-            shutil.rmtree(TMP_DIR)
+            shutil.rmtree(tmp_dir)
             print('Done!')
 
         sys.exit(1)
