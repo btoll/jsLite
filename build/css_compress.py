@@ -10,11 +10,18 @@ import time
 
 def usage():
     str = '''
-        Usage:
-        --output       The name of the new minimized file, defaults to 'min.css'.
-        --dest         The location where the minified file will be moved, defaults to cwd.
-        --src          The location of the CSS files, must be specified.
+        USAGE:
+
+            CLI:
+                python3 css_compress.py -v 3.0.0 --src ../resources/css/ -o JSLITE_CSS_3.0.0.min.js
+
+            As an imported module:
+                css_compress.compress(version, src[, output='min.css', dest='.'])
+
         --version, -v  The version of the minified script, must be specified.
+        --src, -s      The location of the CSS files, must be specified.
+        --output, -o   The name of the new minimized file, defaults to 'min.css'.
+        --dest, -d     The location where the minified file will be moved, defaults to cwd.
     '''
     print(textwrap.dedent(str))
 
@@ -25,7 +32,7 @@ def main(argv):
     version = ''
 
     try:
-        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'output=', 'src=', 'dest='])
+        opts, args = getopt.getopt(argv, 'hv:s:o:d:', ['help', 'version=', 'src=', 'output=', 'dest='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -35,14 +42,14 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt == '--output':
-            output = arg
-        elif opt == '--dest':
-            dest = arg
-        elif opt == '--src':
-            src = arg
         elif opt in ('-v', '--version'):
             version = arg
+        elif opt in ('-s', '--src'):
+            src = arg
+        elif opt in ('-o', '--output'):
+            output = arg
+        elif opt in ('-d' '--dest'):
+            dest = arg
 
     compress(version, src, output, dest)
 

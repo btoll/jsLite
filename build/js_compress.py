@@ -10,13 +10,20 @@ import textwrap
 
 def usage():
     str = '''
-        Usage:
-        --dependencies  A list of scripts, FIFO when compressed, default to an empty list..
-        --output        The name of the new minimized file, defaults to 'min.js'.
-        --dest          The location where the minified file will be moved, defaults to cwd.
-        --src           The location of the JavaScript source files, must be specified.
-        --jar, -j       The location of the jar file, defaults to value of YUICOMPRESSOR environment variable.
+        USAGE:
+
+            CLI:
+                python3 js_compress.py -v 3.0.0 --src ../src/ -o JSLITE_3.0.0.min.js -d 'build' --dependencies [JSLITE.prototype.js, JSLITE.js]
+
+            As an imported module:
+                js_compress.compress(version, src[, output='min.js', dest='.', dependencies=[], jar=None])
+
         --version, -v   The version of the minified script, must be specified.
+        --src, -s       The location of the JavaScript source files, must be specified.
+        --output, -o    The name of the new minimized file, defaults to 'min.js'.
+        --dest, -d      The location where the minified file will be moved, defaults to cwd.
+        --dependencies  A list of scripts, FIFO when compressed, default to an empty list.
+        --jar, -j       The location of the jar file, defaults to the value of YUICOMPRESSOR environment variable.
     '''
     print(textwrap.dedent(str))
 
@@ -29,7 +36,7 @@ def main(argv):
     dependencies = []
 
     try:
-        opts, args = getopt.getopt(argv, 'hj:v:', ['help', 'version=', 'output=', 'jar=', 'src=', 'dest='])
+        opts, args = getopt.getopt(argv, 'hv:s:o:d:j:', ['help', 'version=', 'src=', 'output=', 'dest=', 'dependencies=', 'jar='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -39,16 +46,16 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt == '--dependencies':
-            dependencies = arg
-        elif opt == '--output':
-            output = arg
-        elif opt == '--dest':
-            dest = arg
-        elif opt == '--src':
-            src = arg
         elif opt in ('-v', '--version'):
             version = arg
+        elif opt in ('-s', '--src'):
+            src = arg
+        elif opt in ('-o', '--output'):
+            output = arg
+        elif opt in ('-d', '--dest'):
+            dest = arg
+        elif opt == '--dependencies':
+            dependencies = arg
         elif opt in ('-j', '--jar'):
             jar = arg
 

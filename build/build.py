@@ -6,11 +6,21 @@ import textwrap
 
 def usage():
     str = '''
-        Usage:
-        --build_dir        The location where the minified files will be moved, defaults to cwd.
-        --css_src          The location of the CSS files, must be specified.
-        --js_src           The location of the JavaScript source files, must be specified.
+
+    build(version, js_src, css_src, build_dir)
+
+        USAGE:
+
+            CLI:
+                python3 build.py -v 3.0.0 --js_src ../src/ --css_src ../resources/css/ --build_dir build
+
+            As an imported module:
+                build.build(version, js_src, css_src[, build_dir='.'])
+
         --version, -v      The version of the minified script, must be specified.
+        --js_src           The location of the JavaScript source files, must be specified.
+        --css_src          The location of the CSS files, must be specified.
+        --build_dir        The location where the minified files will be moved, defaults to cwd.
     '''
     print(textwrap.dedent(str))
 
@@ -21,7 +31,7 @@ def main(argv):
     version = ''
 
     try:
-        opts, args = getopt.getopt(argv, 'hv:', ['help', 'version=', 'build_dir=', 'css_src=', 'js_src='])
+        opts, args = getopt.getopt(argv, 'hv:', ['help', 'version=', 'js_src=', 'css_src=', 'build_dir='])
     except getopt.GetoptError:
         print('Error: Unrecognized flag.')
         usage()
@@ -31,14 +41,14 @@ def main(argv):
         if opt in ('-h', '--help'):
             usage()
             sys.exit(0)
-        elif opt == '--build_dir':
-            build_dir = arg
-        elif opt == '--css_src':
-            css_src = arg
-        elif opt == '--js_src':
-            js_src = arg
         elif opt in ('-v', '--version'):
             version = arg
+        elif opt == '--js_src':
+            js_src = arg
+        elif opt == '--css_src':
+            css_src = arg
+        elif opt == '--build_dir':
+            build_dir = arg
 
     build(version, js_src, css_src, build_dir)
 
