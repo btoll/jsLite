@@ -9,23 +9,23 @@ def usage():
         USAGE:
 
             CLI:
-                python3 build.py -v 3.0.0 --js_src ../src/ --css_src ../resources/css/ --build_dir build
+                python3 build.py -v 3.0.0 --js_src src/ --css_src resources/css/ --build_dir build
 
             As an imported module:
-                build.build(version, js_src, css_src[, build_dir='.'])
+                build.build(version, js_src[, css_src, build_dir='.'])
 
         --version, -v      The version of the minified script, must be specified.
         --js_src           The location of the JavaScript source files, must be specified.
-        --css_src          The location of the CSS files, must be specified.
+        --css_src          The location of the CSS files.
         --build_dir        The location where the minified files will be moved, defaults to cwd.
     '''
     print(textwrap.dedent(str))
 
 def main(argv):
-    build_dir = '.'
-    css_src = ''
-    js_src = ''
     version = ''
+    js_src = ''
+    css_src = None
+    build_dir = '.'
 
     try:
         opts, args = getopt.getopt(argv, 'hv:', ['help', 'version=', 'js_src=', 'css_src=', 'build_dir='])
@@ -49,17 +49,13 @@ def main(argv):
 
     build(version, js_src, css_src, build_dir)
 
-def build(version, js_src, css_src, build_dir='.'):
+def build(version, js_src, css_src=None, build_dir='.'):
     if not version:
         print('Error: You must provide a version.')
         sys.exit(2)
 
     if not js_src:
         print('Error: You must provide the location of the JavaScript source files.')
-        sys.exit(2)
-
-    if not css_src:
-        print('Error: You must provide the location of the CSS files.')
         sys.exit(2)
 
     # The order is very important due to some dependencies between scripts, so specify the dependency order here.
@@ -89,7 +85,9 @@ def build(version, js_src, css_src, build_dir='.'):
     css_output = 'JSLITE_CSS_' + version + '.min.js'
 
     js_compress.compress(version, js_src, js_output, build_dir, dependencies)
-    css_compress.compress(version, css_src, css_output, build_dir)
+
+    if css_src:
+        css_compress.compress(version, css_src, css_output, build_dir)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
