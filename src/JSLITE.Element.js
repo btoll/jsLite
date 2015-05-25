@@ -61,7 +61,7 @@ JSLITE.Element.prototype = {
   after: function (vElem) {
 
     var oTargetElement = this.dom,
-      oNewElement = this.get(vElem, true),
+      oNewElement = JSLITE.Element.get(vElem, true),
       parent = oTargetElement.parentNode;
 
     if (parent.lastChild === oTargetElement) {
@@ -120,7 +120,7 @@ oLink.tooltip(oLink.ajax("ajax_sync.html"));
     if (JSLITE.isArray(vElem)) {
       var oFragment = document.createDocumentFragment();
       vElem.forEach(function (v) {
-        oFragment.appendChild(this.get(v, true));
+        oFragment.appendChild(JSLITE.Element.get(v, true));
       });
       this.dom.appendChild(oFragment);
 
@@ -142,7 +142,7 @@ oLink.tooltip(oLink.ajax("ajax_sync.html"));
   before: function (vElem) {
 
     var oTargetElement = this.dom;
-    oTargetElement.parentNode.insertBefore(this.get(vElem, true), oTargetElement);
+    oTargetElement.parentNode.insertBefore(JSLITE.Element.get(vElem, true), oTargetElement);
     return this;
 
   },
@@ -527,7 +527,7 @@ oList.list(aTeams);
       vElem = undefined;
     }
 
-    var oNext = this.get(this, true).nextSibling;
+    var oNext = JSLITE.Element.get(this, true).nextSibling;
     return oNext.nodeType === 1 ?
       bReturnDOM ?
         oNext :
@@ -610,7 +610,7 @@ var oParent = JSLITE.Element.get("#test p span").parent("div", true).style.backg
         oParent :
         JSLITE.Element.get(oParent)
     },
-    oParent = this.get(this, true).parentNode;
+    oParent = JSLITE.Element.get(this, true).parentNode;
 
     if (!oParent) {
       throw new Error("Parent could not be found");
@@ -655,7 +655,7 @@ var oParent = JSLITE.Element.get("#test p span").parent("div", true).style.backg
       vElem = undefined;
     }
 
-    var oPrevious = this.get(this, true).previousSibling;
+    var oPrevious = JSLITE.Element.get(this, true).previousSibling;
     if (!oPrevious) {
       throw new Error("Previous sibling could not be found");
     }
@@ -701,7 +701,8 @@ var oRemovedElement = JSLITE.garbage["two"];
         cChildren[i].parentNode.removeChild(cChildren[i]); //remember a node list is a live list;
       }
     } else {
-      o = this.get(vElem || this, true);
+    debugger;
+      o = JSLITE.Element.get(vElem || this, true);
       //JSLITE.garbage[o.id] = o.parentNode.removeChild(o);
       o.parentNode.removeChild(o);
     }
@@ -923,7 +924,7 @@ JSLITE.Element.gets("a[href!=#][rel]").tooltip(["{rel}", " {", "<a href='{href}'
   //<source>
   trim: function () {
 
-    var oDom = this.get(this, true);
+    var oDom = JSLITE.Element.get(this, true);
     if (!JSLITE.dom.isTextBox(oDom)) {
       return;
     }
@@ -1277,7 +1278,7 @@ JSLITE.apply(JSLITE.Element, {
      */
     //<source>
     formElements: function (vForm) {
-        var oForm = this.get($(vForm), true);
+        var oForm = JSLITE.Element.get($(vForm), true);
         if (oForm.nodeName.toLocaleLowerCase() !== "form") {
           throw new Error("This method can only be invoked on a form element.");
         }
