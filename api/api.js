@@ -1,17 +1,15 @@
 /*
  * jsLite
  *
- * Copyright (c) 2009 - 2011 Benjamin Toll (benjamintoll.com)
+ * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
  *
  */
-
 JSLITE.ready(function () {
-
   //create the overlay and remove once all the scripts have been loaded;
-  //var oOverlay = new JSLITE.ux.Overlay(document.body);
-  //oOverlay.show();
+  var oOverlay = new JSLITE.ux.Overlay(document.body);
+  oOverlay.show();
 
   (function () {
     /*first declare all vars and functions*/
@@ -440,10 +438,11 @@ JSLITE.ready(function () {
         fnJSDoc(e);
       }
       if (JSLITE.isIE) {
-        document.execCommand("BackgroundImageCache", false, true); //kills the nasty background image flicker bug in ie6;
+        // Kills the nasty background image flicker bug in ie6.
+        document.execCommand("BackgroundImageCache", false, true);
       }
-      //JSLITE.Element.fly(JSLITE.globalSymbol + "_Overlay").remove();
-      //oOverlay.hide();
+
+      oOverlay.hide();
     }, 1000);
 
     /*event delegation*/
