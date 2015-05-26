@@ -1,7 +1,7 @@
 /*
  * jsLite
  *
- * Copyright (c) 2009 - 2011 Benjamin Toll (benjamintoll.com)
+ * Copyright (c) 2009 - 2015 Benjamin Toll (benjamintoll.com)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
  *
@@ -9,26 +9,27 @@
 
 var JSLITE;
 if (!JSLITE) {
-  JSLITE = {};
+    JSLITE = {};
 }
 
 /**
 * @function JSLITE.apply
-* @param {Object} oChild
-* @param {Object} oParent
+* @param {Object} child
+* @param {Object} parent
 * @return {Object}
-* @describe <p>Copies all properties of <code>oParent</code> to <code>oChild</code>. Doesn't check for pre-existing properties.</p>
+* @describe <p>Copies all properties of <code>parent</code> to <code>child</code>. Doesn't check for pre-existing properties.</p>
 */
 //<source>
-JSLITE.apply = function (oChild, oParent) {
+JSLITE.apply = function (child, parent) {
+    var i;
 
-  for (var i in oParent) {
-    if (oParent.hasOwnProperty(i)) {
-      oChild[i] = oParent[i];
+    for (i in parent) {
+        if (parent.hasOwnProperty(i)) {
+            child[i] = parent[i];
+        }
     }
-  }
-  return oChild;
 
+    return child;
 };
 //</source>
 
@@ -343,25 +344,28 @@ Car = JSLITE.extend(JSLITE.Observer, {
   }.assert(Object),
   //</source>
 
-  /*****************************************************************************************************************/
-  /*****************************************************************************************************************/
-  /**
-  * @function JSLITE.ready
-  * @param {Function} fn
-  * @return {None}
-  * @describe <p>Should be the first statement called in any jsLite application. All code to be invoked at page load should be within the function that is the sole argument.</p>
-  */
-  //<source>
-  ready: function (fn) {
+    /*****************************************************************************************************************/
+    /*****************************************************************************************************************/
+    /**
+    * @function JSLITE.ready
+    * @param {Function} fn
+    * @param {Function} callback A callback that is called when the window.load event is fired.
+    * @return {None}
+    * @describe <p>Should be the first statement called in any jsLite application. All code to be invoked at page load should be within the function that is the sole argument.</p>
+    */
+    //<source>
+    ready: function (fn, callback) {
+        if (!JSLITE.isIE) {
+            document.addEventListener('DOMContentLoaded', fn, false);
+        } else {
+            window.attachEvent('onload', fn);
+        }
 
-    if (!JSLITE.isIE) {
-      document.addEventListener("DOMContentLoaded", fn, false);
-    } else {
-      window.attachEvent("onload", fn);
-    }
-
-  },
-  //</source>
+        if (callback) {
+            JSLITE.Element.fly(window).on('load', callback);
+        }
+    },
+    //</source>
 
   /**
   * @function JSLITE.toArray
