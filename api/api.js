@@ -7,9 +7,9 @@
  *
  */
 JSLITE.ready(function () {
-  //create the overlay and remove once all the scripts have been loaded;
-  var oOverlay = new JSLITE.ux.Overlay(document.body);
-  oOverlay.show();
+  // Create the mask and remove once all the scripts have been loaded.
+  var mask = new JSLITE.ux.Mask(document.body);
+  mask.show();
 
   (function () {
     /*first declare all vars and functions*/
@@ -442,7 +442,7 @@ JSLITE.ready(function () {
         document.execCommand("BackgroundImageCache", false, true);
       }
 
-      oOverlay.hide();
+      mask.hide();
     }, 1000);
 
     /*event delegation*/

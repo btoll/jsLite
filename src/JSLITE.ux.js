@@ -484,9 +484,9 @@ JSLITE.ux.Tooltip = (function () {
 
 }());
 
-JSLITE.ux.Overlay = function (vElem) {
+JSLITE.ux.Mask = function (vElem) {
   this.element = JSLITE.Element.get(vElem);
-  this.overlay = JSLITE.Element.create({tag: "div",
+  this.mask = JSLITE.Element.create({tag: "div",
     style: {
       background: "url(http://www.benjamintoll.com/jslite/images/loading.gif) 50% 50% no-repeat",
       backgroundColor: "#CCC",
@@ -497,18 +497,19 @@ JSLITE.ux.Overlay = function (vElem) {
       position: "absolute",
       top: 0,
       left: 0,
-      width: vElem === document.body ? Math.max(document.body.scrollWidth, document.documentElement.clientWidth) + "px" : this.element.getStyle("width")
+      width: vElem === document.body ? Math.max(document.body.scrollWidth, document.documentElement.clientWidth) + "px" : this.element.getStyle("width"),
+      zIndex: 99999999
     },
     parent: this.element.dom
   });
 };
 
-JSLITE.extend(JSLITE.ux.Overlay, JSLITE.Observer, {
+JSLITE.extend(JSLITE.ux.Mask, JSLITE.Observer, {
   hide: function () {
-    this.overlay.dom.style.display = "none";
+    this.mask.dom.style.display = "none";
   },
   show: function () {
-    this.overlay.dom.style.display = "block";
+    this.mask.dom.style.display = "block";
   }
 });
 
@@ -800,7 +801,7 @@ JSLITE.extend(JSLITE.ux.Grid, JSLITE.ux.GridView, {
       } else {
         var fn = function () {
           doRender.call(that);
-          that.store.overlay = that.overlay = new JSLITE.ux.Overlay(that.id);
+          that.store.mask = that.mask = new JSLITE.ux.Mask(that.id);
           that.store.unsubscribe("gridload", fn); //make sure to remove this handler or it will be called every time a page is changed in the pager;
         };
         this.store.subscribe("gridload", fn);
@@ -856,9 +857,9 @@ JSLITE.extend(JSLITE.ux.Store, JSLITE.Observer, {
       }
       this.fire("gridload");
     }
-  
-    if (this.overlay) {
-      this.overlay.hide();
+
+    if (this.mask) {
+      this.mask.hide();
     }
 
   },
@@ -1317,7 +1318,7 @@ JSLITE.extend(JSLITE.ux.Pager, JSLITE.Observer, {
     //append the option controls to the list and bind the handlers;
     JSLITE.Element.get("#" + oGrid.id + " ." + JSLITE.globalSymbol + "_Pager_select").append(arr).on("change", function (e) {
       var sValue = this.value;
-      that.store.overlay.show();
+      that.store.mask.show();
       that.store.fetch(sValue); //initiate the request for the new page data;
       that.fire("pagechange", { //let the pager control know how to update its view;
         currentPage: sValue

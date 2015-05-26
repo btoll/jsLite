@@ -7,7 +7,8 @@
   margin: 0;
   overflow: hidden;
   padding: 0;
-  position: relative; /*make it a container for the loading overlay*/
+  /*make it a container for the loading mask*/
+  position: relative;
 }
 .JSLITE_Grid_container th,
 .JSLITE_Grid_container td {
