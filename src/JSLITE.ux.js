@@ -484,10 +484,10 @@ JSLITE.ux.Tooltip = (function () {
 
 }());
 
-JSLITE.ux.Mask = function (el) {
+JSLITE.ux.Mask = function (el, options) {
     this.el = JSLITE.Element.get(el);
 
-    this.mask = JSLITE.Element.create({tag: "div",
+    this.mask = JSLITE.Element.create(JSLITE.apply({tag: 'div',
         style: {
             background: 'url(resources/images/loading.gif) 50% 50% no-repeat',
             backgroundColor: '#CCC',
@@ -499,10 +499,10 @@ JSLITE.ux.Mask = function (el) {
             top: 0,
             left: 0,
             width: this.el.getWidth(),
-            zIndex: 99999999
+            zIndex: 10000
         },
         parent: this.el.dom
-    });
+    }, options));
 };
 
 JSLITE.extend(JSLITE.ux.Mask, JSLITE.Observer, {
