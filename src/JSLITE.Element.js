@@ -278,39 +278,80 @@ cInputs.enable();
   },
   //</source>
 
-  /**
-  * @function JSLITE.Element.getStyle
-  * @param {String} sName CSS property name
-  * @return {String/Null}
-  * @describe <p>Supply a CSS property to lookup.  Returns the result of the lookup or <code>null</code>.</p><p>NOTE: this method doesn't support composite objects (<code><a href="#jsdoc">JSLITE.Composite</a></code>).</p>
-  * @example
-this.tooltip.width = parseInt(JSLITE.Element.fly(this.tooltip).getStyle("width"), 10);
-  */
-  //<source>
-  getStyle: function (sName) {
+    /**
+    * @function JSLITE.Element.getHeight
+    * @return {String/Null}
+    * @describe <p>Gets the height of the Element.  Returns the result of the lookup or <code>null</code>.</p><p>NOTE: this method doesn't support composite objects (<code><a href="#jsdoc">JSLITE.Composite</a></code>).</p>
+    * @example
+  this.tooltip.width = parseInt(JSLITE.Element.fly(this.tooltip).getHeight(), 10);
+    */
+    //<source>
+    getHeight: function () {
+        var height;
 
-    //if the property exists in style[] then it's been set recently and is current;
-    if (this.dom.style[sName]) {
-      return this.dom.style[sName];
+        if (this.dom === document.body) {
+            height = Math.max(document.documentElement.offsetHeight, document.body.scrollHeight, document.documentElement.clientHeight) + 'px';
+        } else {
+            height = this.getStyle('height');
+        }
 
-    } else if (document.defaultView && document.defaultView.getComputedStyle) { //w3c;
-      /*it uses the traditional 'text-align' style of rule writing instead of 'textAlign'*/
-      sName = sName.replace(/([A-Z])/g, "-$1");
-      sName = sName.toLocaleLowerCase();
+        return height;
+    },
+    //</source>
 
-      //get the style object and get the value of the property if it exists;
-      var obj = document.defaultView.getComputedStyle(this.dom, "");
-      return obj && obj.getPropertyValue(sName);
+    /**
+    * @function JSLITE.Element.getStyle
+    * @param {String} name CSS property name
+    * @return {String/Null}
+    * @describe <p>Supply a CSS property to lookup.  Returns the result of the lookup or <code>null</code>.</p><p>NOTE: this method doesn't support composite objects (<code><a href="#jsdoc">JSLITE.Composite</a></code>).</p>
+    * @example
+  this.tooltip.width = parseInt(JSLITE.Element.fly(this.tooltip).getStyle("width"), 10);
+    */
+    //<source>
+    getStyle: function (name) {
+        var obj;
 
-    } else if (this.dom.currentStyle) { //ie and early versions of opera;
-      return this.dom.currentStyle[sName];
+        // If the property exists in style[] then it's been set recently and is current.
+        if (this.dom.style[name]) {
+            return this.dom.style[name];
+        } else if (document.defaultView && document.defaultView.getComputedStyle) { //w3c;
+            // It uses the traditional 'text-align' style of rule writing instead of 'textAlign'.
+            name = name.replace(/([A-Z])/g, "-$1");
+            name = name.toLocaleLowerCase();
 
-    } else { //otherwise, some other browser is being used;
-      return null;
-    }
+            // Get the style object and get the value of the property if it exists.
+            obj = document.defaultView.getComputedStyle(this.dom, "");
+            return obj && obj.getPropertyValue(name);
+        // IE and early versions of Opera.
+        } else if (this.dom.currentStyle) {
+            return this.dom.currentStyle[name];
+        // Otherwise, some other browser is being used.
+        } else {
+            return null;
+        }
+    },
+    //</source>
 
-  },
-  //</source>
+    /**
+    * @function JSLITE.Element.getWidth
+    * @return {String/Null}
+    * @describe <p>Gets the width of the Element.  Returns the result of the lookup or <code>null</code>.</p><p>NOTE: this method doesn't support composite objects (<code><a href="#jsdoc">JSLITE.Composite</a></code>).</p>
+    * @example
+  this.tooltip.width = parseInt(JSLITE.Element.fly(this.tooltip).getWidth(), 10);
+    */
+    //<source>
+    getWidth: function () {
+        var width;
+
+        if (this.dom === document.body) {
+            width = Math.max(document.body.scrollWidth, document.documentElement.clientWidth) + 'px';
+        } else {
+            width = this.getStyle('width');
+        }
+
+        return width;
+    },
+    //</source>
 
   /*wrapping classname in spaces means that a regexp isn't needed*/
   /**

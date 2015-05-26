@@ -484,33 +484,34 @@ JSLITE.ux.Tooltip = (function () {
 
 }());
 
-JSLITE.ux.Mask = function (vElem) {
-  this.element = JSLITE.Element.get(vElem);
-  this.mask = JSLITE.Element.create({tag: "div",
-    style: {
-      background: "url(http://www.benjamintoll.com/jslite/images/loading.gif) 50% 50% no-repeat",
-      backgroundColor: "#CCC",
-      display: "none",
-      height: vElem === document.body ? Math.max(document.documentElement.offsetHeight, document.body.scrollHeight, document.documentElement.clientHeight) + "px": this.element.getStyle("height"),
-      opacity: 0.7,
-      filter: "alpha(opacity=70)",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      width: vElem === document.body ? Math.max(document.body.scrollWidth, document.documentElement.clientWidth) + "px" : this.element.getStyle("width"),
-      zIndex: 99999999
-    },
-    parent: this.element.dom
-  });
+JSLITE.ux.Mask = function (el) {
+    this.el = JSLITE.Element.get(el);
+
+    this.mask = JSLITE.Element.create({tag: "div",
+        style: {
+            background: 'url(resources/images/loading.gif) 50% 50% no-repeat',
+            backgroundColor: '#CCC',
+            display: 'none',
+            height: this.el.getHeight(),
+            opacity: 0.7,
+            filter: 'alpha(opacity=70)',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: this.el.getWidth(),
+            zIndex: 99999999
+        },
+        parent: this.el.dom
+    });
 };
 
 JSLITE.extend(JSLITE.ux.Mask, JSLITE.Observer, {
-  hide: function () {
-    this.mask.dom.style.display = "none";
-  },
-  show: function () {
-    this.mask.dom.style.display = "block";
-  }
+    hide: function () {
+        this.mask.dom.style.display = 'none';
+    },
+    show: function () {
+        this.mask.dom.style.display = 'block';
+    }
 });
 
 /*****************************************************************************************************************/
