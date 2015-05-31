@@ -8,7 +8,11 @@
  */
 JSLITE.ready(function () {
   // Create the mask and remove once all the scripts have been loaded.
-  var mask = new JSLITE.ux.Mask(document.body);
+  var mask = new JSLITE.ux.Mask(document.body),
+    globalSymbol = JSLITE.globalSymbol,
+    // The regex changes 'Array' to 'JSLITE' and strips '.gets' from 'JSLITE.Element.gets', for example.
+    titleRe = /^(Array)?(.*)\.[^.\W]+$/;
+
   mask.show();
 
   (function () {
@@ -16,8 +20,8 @@ JSLITE.ready(function () {
     /*save this regex just in case*/
     ///((?:[a-zA-z_\-]*\.)*[a-zA-z_\-]*)\s*[:=]\s*\(?function\s*\([a-zA-Z,\s]*\)/; //matches "Array.prototype.forEach = function (callback, oOptional)";
 
-    var sSymbol = "JSLITE", //set the global symbol to search for;
-      aKeywords = ["function", "property", "type", "param", "return", "extends", "mixin", "events", "describe", "example"], //set the @tags to search for in the source, i.e., "@param", "@return", etc.;
+    var sSymbol = 'JSLITE', //set the global symbol to search for;
+      aKeywords = ['function', 'property', 'type', 'param', 'return', 'extends', 'mixin', 'events', 'describe', 'example'], //set the @tags to search for in the source, i.e., '@param', '@return', etc.;
       oNamespaces = {}, //this object will hold all of the methods and chunks from each parsed script;
       aSignature = [], //this array will hold the method signature constructed from @function and @param, i.e., "JSLITE.dom.attachHandler: function(vElem) { ... }";
       oFragment = document.createDocumentFragment(),
@@ -61,21 +65,35 @@ JSLITE.ready(function () {
           aTemp[2] = " ";
           aTemp[3] = oChunk.example[0].description.invoke("HTMLify");
           aTemp[4] = "</code></pre></div>";
-          $("example").innerHTML =  aTemp.join(""); 
+          $("example").innerHTML =  aTemp.join("");
         }
       },
       "function": {
         template: function (obj, oChunk) {
           var arr = [],
             sFuncName = oChunk["function"][0].name,
-            i,
-            len;
+            i, len, titleHref, titleText;
 
           for (i = 0, len = oChunk.param.length; i < len; i++) {
             arr.push(oChunk.param[i].name);
           }
-          //$("title").innerHTML = aSignature[0] = "<a href='#'>" + (sFuncName.indexOf(".") === -1 ? JSLITE.globalSymbol + "." + sFuncName : sFuncName) + "</a>"; //if there's no period in the function name then append the global symbol; also, wrap the method name in a link so the user can click it and go directly to the source;
-          $("title").innerHTML = aSignature[0] = sFuncName.indexOf(".") === -1 ? JSLITE.globalSymbol + "." + sFuncName : sFuncName; //if there's no period in the function name then append the global symbol;
+
+          // If there's no period in the function name then append the global symbol. Also, wrap the method name
+          // in a link so the user can click it and go directly to the source.
+          if (sFuncName.indexOf('.') === -1) {
+              titleText = titleHref = aSignature[0] = globalSymbol + '.' + sFuncName;
+          } else {
+              titleText = aSignature[0] = sFuncName;
+              titleHref = sFuncName.replace(titleRe, function (a, $1, $2) {
+                  // Match will either be 'Array' or undefined. Swap out 'Array' for 'JSLITE' to build the href.
+                  // Note that if $1 is undefined then sFuncName already contains 'JSLITE' so just return an empty string.
+                  $1 = $1 ? 'JSLITE' : '';
+                  return $1 + $2;
+              });
+          }
+
+          $('title').innerHTML = ['<a href="../src/', titleHref, '.js" target="_blank">', titleText, '</a>'].join('');
+
           aSignature[1] = sFuncName.indexOf("prototype") === -1 ? ":" : " = ";
           aSignature[2] = " function (";
           aSignature[3] = arr.join(", ");
@@ -94,7 +112,7 @@ JSLITE.ready(function () {
             aTemp[2] = " ";
             aTemp[3] = oChunk.describe[0].description.invoke("HTMLify");
             aTemp[4] = "</code></pre></div>";
-            $("description").innerHTML =  aTemp.join(""); 
+            $("description").innerHTML =  aTemp.join("");
           }
         }
       },
@@ -148,7 +166,7 @@ JSLITE.ready(function () {
             oHref.replaceClass("expand", "contract");
           }
         },
-  
+
         fnHowMany = function (sInnerHTML) {
           var s;
           switch (JSLITE.util.howMany(sInnerHTML, ".")) {
@@ -158,7 +176,7 @@ JSLITE.ready(function () {
           }
           return s;
         },
-  
+
         fnGetJSDoc = function (sInnerHTML) {
           var v, p;
           try {
@@ -169,7 +187,7 @@ JSLITE.ready(function () {
           }
           return v;
         };
-  
+
       if (oTarget.nodeName.toLocaleLowerCase() === "a" && oTarget.className.indexOf("expand") === -1 && oTarget.className.indexOf("contract") === -1) { //only target the links within each "header";
         /*remove the "selected" classname from $("tree") and then add it to the current <a>*/
         JSLITE.Element.gets("#tree a").removeClass("selected"); //remove the selected class from any element that may have it;
@@ -424,31 +442,31 @@ JSLITE.ready(function () {
     setTimeout(function () {
       JSLITE.ux.Tabs();
       JSLITE.dom.targetBlank();
-      JSLITE.dom.blur({tag: "a", parent: "tree"});
-      JSLITE.Element.fly("searchForm").on("submit", fnSearch);
+      JSLITE.dom.blur({tag: 'a', parent: 'tree'});
+      JSLITE.Element.fly('searchForm').on('submit', fnSearch);
       if (location.hash) {
         var e = {
           target: {
-            nodeName: "A",
-            innerHTML: location.hash.slice(1), //chop off the "#";
-            href: "#jsdoc",
-            className: ""
+            nodeName: 'A',
+            // Chop off the '#'.
+            innerHTML: location.hash.slice(1),
+            href: '#jsdoc',
+            className: ''
           }
         };
         fnJSDoc(e);
       }
       if (JSLITE.isIE) {
         // Kills the nasty background image flicker bug in ie6.
-        document.execCommand("BackgroundImageCache", false, true);
+        document.execCommand('BackgroundImageCache', false, true);
       }
 
       mask.hide();
     }, 1000);
 
-    /*event delegation*/
-    JSLITE.Element.fly("tree").on("click", fnJSDoc);
-    JSLITE.Element.fly("response").on("click", fnJSDoc);
-
+    // Let's use event delegation.
+    JSLITE.Element.fly('tree').on('click', fnJSDoc);
+    JSLITE.Element.fly('.JSLITE_Tabs').on('click', fnJSDoc);
   }());
-
 });
+
