@@ -84,10 +84,10 @@ def build(version, js_src, css_src=None, build_dir='.'):
     js_output = 'JSLITE_' + version + '.min.js'
     css_output = 'JSLITE_CSS_' + version + '.min.js'
 
-    js_compress.compress(version, js_src, js_output, build_dir, dependencies)
+    js_compress.compress(js_src, js_output, build_dir, version, dependencies)
 
     if css_src:
-        css_compress.compress(version, css_src, css_output, build_dir)
+        css_compress.compress(css_src, css_output, build_dir, version)
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
